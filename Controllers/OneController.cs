@@ -25,23 +25,24 @@ namespace net8.Controllers
         //https://tenapi.cn/bilibili/?uid=18180392
 
         [HttpGet]
-        public async Task<ActionResult> GetConncetion (string member)
+        public async Task<ActionResult> GetConncetion ([FromServices] HttpClientManager clientManager,string mid)
         {
             var (imgKey, subKey) = await ParamUrl.GetWbiKeys();
 
             Dictionary<string,string> signedParams = ParamUrl.EncWbi(
-                parameters: new Dictionary<string,string> { { "mid",member } },
+                parameters: new Dictionary<string,string> { { "mid",mid } },
                 imgKey: imgKey,
                 subKey: subKey
             );
 
             string query = await new FormUrlEncodedContent(signedParams).ReadAsStringAsync();
 
-            //Console.WriteLine(query);
-            HttpClientManager clientManager = new HttpClientManager();
+            Console.WriteLine(query);
+
             string response = await clientManager.GetResponseAsync(query);
 
             await Console.Out.WriteLineAsync(response);
+
             return (Ok());
         }
     }

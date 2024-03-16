@@ -15,7 +15,7 @@
                 using (StreamReader sr = new StreamReader(filePath))
                 {
                     // 读取文件的每一行到列表中
-                    if (lines == null)
+                    if (lines.Count == 0)
                     {
                         var lines = await ReadLinesAsync(sr);
                     }
@@ -26,6 +26,7 @@
                     // 随机选择一行并打印出来
                     int randomIndex = rand.Next(0,lines.Count);
                     string randomLine = lines[randomIndex];
+                    await Console.Out.WriteLineAsync(randomLine);
                     return randomLine;
                 }
             }

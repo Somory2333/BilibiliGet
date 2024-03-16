@@ -17,10 +17,10 @@ namespace net8.Controllers
 
 
         [HttpGet]
-        public async Task<IEnumerable<string>> GetMessageAsync ()
+        public async Task<IEnumerable<string>> GetMessageAsync ([FromServices] HttpClientManager httpClientManager)
         {
             // 设置时间间隔为 1 秒
-            int intervalMilliseconds = 1000;
+            int intervalMilliseconds = 100;
 
             Dictionary<string,string> keyValuePairs = new Dictionary<string,string>();
             if (keyValuePairs == null)
@@ -34,49 +34,34 @@ namespace net8.Controllers
             var (imgKey, subKey) = await ParamUrl.GetWbiKeys();
 
 
-            using (HttpClient httpClient = new HttpClient(new HttpClientHandler()
+
+
+            for (int i = 2;i < 5;i++)
             {
-                AutomaticDecompression = DecompressionMethods.All
-            }))
-            {
-
-                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0"
+                keyValuePairs["mid"] = i.ToString();
+                signedParams = ParamUrl.EncWbi(
+                    parameters: keyValuePairs,
+                    imgKey: imgKey,
+                    subKey: subKey
                 );
-                httpClient.DefaultRequestHeaders.Accept.ParseAdd(
-                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-                );
-                httpClient.DefaultRequestHeaders.Connection.ParseAdd("keep-alive");
-                httpClient.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br, zstd");
-                httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("zh-CN,zh;q=0.9,en;q=0.8");
 
-                for (int i = 2;i < 5;i++)
-                {
-                    keyValuePairs["mid"] = i.ToString();
-                    signedParams = ParamUrl.EncWbi(
-                        parameters: keyValuePairs,
-                        imgKey: imgKey,
-                        subKey: subKey
-                    );
+                string query = await new FormUrlEncodedContent(signedParams).ReadAsStringAsync();
+                var resolve = await httpClientManager.GetResponseAsync(query);
 
-                    string query = await new FormUrlEncodedContent(signedParams).ReadAsStringAsync();
-                    HttpResponseMessage httpResponseMessage = await httpClient.SendAsync(
-                    new HttpRequestMessage { RequestUri = new Uri($"https://api.bilibili.com/x/space/wbi/acc/info?{query}") });
-                    var resolve = await httpResponseMessage.Content.ReadAsStringAsync();
-                    messages.Add(resolve);
-
-                }
-                foreach (var message in messages)
-                {
-
-                    await Console.Out.WriteLineAsync(message);
-                }
-
-                return messages;
-
-
-
+                messages.Add(resolve);
+                Thread.Sleep(intervalMilliseconds);
             }
+            foreach (var message in messages)
+            {
+
+                await Console.Out.WriteLineAsync(message);
+            }
+
+            return messages;
+
+
+
+
 
 
 

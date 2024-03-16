@@ -9,9 +9,6 @@ namespace net8
         private HttpClient _httpClient = new HttpClient(new HttpClientHandler
         {
             AutomaticDecompression = DecompressionMethods.All
-
-
-
         });
         private readonly RandomRead randomRead = new RandomRead();
 
@@ -27,13 +24,15 @@ namespace net8
             _httpClient.DefaultRequestHeaders.AcceptCharset.ParseAdd("utf-8");
             _httpClient.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br, zstd");
             _httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("zh-CN,zh;q=0.9,en;q=0.8");
-
+            _httpClient.DefaultRequestHeaders.Upgrade.ParseAdd("1");
         }
 
         public async Task<string> GetResponseAsync (string query)
         {
+            string user_agent = randomRead.OpenTextAsync().Result;
+            await Console.Out.WriteLineAsync(user_agent);
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
-                randomRead.OpenTextAsync().Result
+                user_agent
             );
             HttpResponseMessage response = await _httpClient.GetAsync($"https://api.bilibili.com/x/space/wbi/acc/info?{query}");
 
@@ -69,7 +68,7 @@ namespace net8
                     {
                         string responseBody = await reader.ReadToEndAsync();
 
-                        Console.WriteLine(responseBody);
+                        //Console.WriteLine(responseBody);
                     }
                 }
             }

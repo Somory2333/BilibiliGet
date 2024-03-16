@@ -12,6 +12,8 @@ builder.Services.AddSwaggerGen();
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });*/
 builder.Services.AddDataProtection();
+builder.Services.AddScoped<HttpClientManager>();
+builder.Services.AddScoped<RandomRead>();
 var app = builder.Build();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
