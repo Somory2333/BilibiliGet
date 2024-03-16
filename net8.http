@@ -1,0 +1,34 @@
+@net8_HostAddress = https://localhost:7084
+
+
+
+POST {{net8_HostAddress}}/todoitems
+Content-Type: application/json
+
+{
+  "name":"walk dog",
+  "isComplete":true
+}
+###
+
+DELETE {{net8_HostAddress}}/todoitems/1
+
+###
+
+GET {{net8_HostAddress}}/todoitems/2
+
+###
+
+GET {{net8_HostAddress}}/todoitems
+
+###
+
+PUT {{net8_HostAddress}}/todoitems/3
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "feed fish",
+  "isComplete": false
+}
+###
