@@ -19,7 +19,7 @@ namespace net8.Controllers
         [HttpGet]
         public async Task<IEnumerable<string>> GetMessageAsync ([FromServices] HttpClientManager httpClientManager)
         {
-            // 设置时间间隔为 1 秒
+            // 设置时间间隔为 0.1 秒
             int intervalMilliseconds = 100;
 
             Dictionary<string,string> keyValuePairs = new Dictionary<string,string>();
@@ -36,7 +36,7 @@ namespace net8.Controllers
 
 
 
-            for (int i = 2;i < 5;i++)
+            for (int i = 2;i < 50;i++)
             {
                 keyValuePairs["mid"] = i.ToString();
                 signedParams = ParamUrl.EncWbi(

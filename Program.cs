@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 /*builder.Services.AddDbContext<UserDb>(opt => {
     //string connstr = builder.Configuration.GetSection("ConnStr").Value;
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));

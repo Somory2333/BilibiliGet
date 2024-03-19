@@ -1,6 +1,9 @@
 ﻿using System.IO.Compression;
 using System.Net;
 using System.Text;
+using System.Text.Json;
+
+using Microsoft.AspNetCore.DataProtection;
 
 namespace net8
 {
@@ -25,12 +28,59 @@ namespace net8
             _httpClient.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br, zstd");
             _httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("zh-CN,zh;q=0.9,en;q=0.8");
             _httpClient.DefaultRequestHeaders.Upgrade.ParseAdd("1");
+            _httpClient.DefaultRequestHeaders.Add("Cache-Control","0");
+            _httpClient.DefaultRequestHeaders.Add("Cookie",CookieRead());
+        }
+
+        public string CookieRead ()
+        {
+            string Truevalue = "";
+            try
+            {
+                string secret = File.ReadAllText(@"C:\Cookie\secrets.json");
+                // 读取JSON文件内容
+
+
+                // 使用 JsonDocument 解析 JSON
+                using (JsonDocument document = JsonDocument.Parse(secret))
+                {
+                    // 获取根元素
+                    JsonElement root = document.RootElement;
+
+                    // 检查是否存在该键
+                    if (root.TryGetProperty("Cookie",out JsonElement value))
+                    {
+                        // 获取键对应的值
+                        Console.WriteLine($"Value: {value.GetString()}");
+                        Truevalue = value.ToString();
+                    }
+                    else
+                    {
+                        Console.WriteLine("指定的键不存在。");
+                    }
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("JSON文件未找到。");
+            }
+            catch (JsonException)
+            {
+                Console.WriteLine("无法解析JSON文件。");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"发生了错误: {ex.Message}");
+            }
+            return Truevalue;
+
         }
 
         public async Task<string> GetResponseAsync (string query)
         {
             string user_agent = randomRead.OpenTextAsync().Result;
-            await Console.Out.WriteLineAsync(user_agent);
+
+            //await Console.Out.WriteLineAsync(user_agent);
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
                 user_agent
             );
