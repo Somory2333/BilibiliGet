@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -39,9 +40,18 @@ namespace net8.Controllers
 
             Console.WriteLine(query);
 
-            string response = await clientManager.GetResponseAsync(query);
+            using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
+            {
+                CancellationToken cancellationToken = cancellationTokenSource.Token;
 
-            await Console.Out.WriteLineAsync(response);
+                string response = await clientManager.GetResponseAsync(query,cancellationToken);
+                await Console.Out.WriteLineAsync(response);
+                cancellationTokenSource.Cancel();
+            }
+
+
+
+
 
             return (Ok());
         }

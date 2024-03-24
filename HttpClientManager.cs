@@ -3,6 +3,8 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 
+using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
+
 using Microsoft.AspNetCore.DataProtection;
 
 namespace net8
@@ -76,7 +78,7 @@ namespace net8
 
         }
 
-        public async Task<string> GetResponseAsync (string query)
+        public async Task<string> GetResponseAsync (string query,CancellationToken cancellationToken)
         {
             string user_agent = randomRead.OpenTextAsync().Result;
 
@@ -84,49 +86,65 @@ namespace net8
             _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
                 user_agent
             );
-            HttpResponseMessage response = await _httpClient.GetAsync($"https://api.bilibili.com/x/space/wbi/acc/info?{query}");
-
-            if (response.IsSuccessStatusCode)
+            HttpResponseMessage response;
+            try
             {
-                // Read the response content as stream
-                Stream responseStream = await response.Content.ReadAsStreamAsync();
-
-                // Check if the response is gzip compressed
-                if (response.Content.Headers.ContentEncoding.Contains("gzip"))
+                response = await _httpClient.GetAsync($"https://api.bilibili.com/x/space/wbi/acc/info?{query}");
+                int d = Thread.CurrentThread.ManagedThreadId;
+                await Console.Out.WriteLineAsync("threadid" + d);
+                if (response.IsSuccessStatusCode)
                 {
-                    // Decompress the response stream using GZipStream
-                    using (var gzipStream = new GZipStream(responseStream,CompressionMode.Decompress))
+                    // Read the response content as stream
+                    Stream responseStream = await response.Content.ReadAsStreamAsync();
+
+                    // Check if the response is gzip compressed
+                    if (response.Content.Headers.ContentEncoding.Contains("gzip"))
                     {
-                        using (var reader = new StreamReader(gzipStream))
+                        // Decompress the response stream using GZipStream
+                        using (var gzipStream = new GZipStream(responseStream,CompressionMode.Decompress))
                         {
-                            // Read the decompressed stream as string
+                            using (var reader = new StreamReader(gzipStream))
+                            {
+                                // Read the decompressed stream as string
+                                string responseBody = await reader.ReadToEndAsync();
+
+                                // Now you can work with responseBody
+                                Console.WriteLine(responseBody);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // If not gzip compressed, read the stream as string directly
+                        using (var reader = new StreamReader(responseStream,Encoding.Latin1
+
+
+
+                            ))
+                        {
                             string responseBody = await reader.ReadToEndAsync();
 
-                            // Now you can work with responseBody
-                            Console.WriteLine(responseBody);
+                            //Console.WriteLine(responseBody);
                         }
                     }
                 }
                 else
                 {
-                    // If not gzip compressed, read the stream as string directly
-                    using (var reader = new StreamReader(responseStream,Encoding.Latin1
-
-
-
-                        ))
-                    {
-                        string responseBody = await reader.ReadToEndAsync();
-
-                        //Console.WriteLine(responseBody);
-                    }
+                    Console.WriteLine("Failed to get response. Status code: " + response.StatusCode);
                 }
+                return await response.Content.ReadAsStringAsync();
             }
-            else
+            catch (OperationCanceledException)
             {
-                Console.WriteLine("Failed to get response. Status code: " + response.StatusCode);
+                // 用户取消操作时的处理
+                Console.WriteLine($"Request to url was canceled.");
             }
-            return await response.Content.ReadAsStringAsync();
+            catch (Exception ex)
+            {
+                // 处理其他异常
+                Console.WriteLine($"Error occurred while requesting url: {ex.Message}");
+            }
+            return "";
         }
 
 

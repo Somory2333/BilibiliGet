@@ -14,11 +14,12 @@ namespace net8.Controllers
     [ApiController]
     public class ReadMoreController : ControllerBase
     {
-
+        private FilterData filter;
 
         [HttpGet]
-        public async Task<IEnumerable<string>> GetMessageAsync ([FromServices] HttpClientManager httpClientManager)
+        public async Task<IEnumerable<User>> GetMessageAsync ([FromServices] HttpClientManager httpClientManager)
         {
+            filter = new FilterData();
             // 设置时间间隔为 0.1 秒
             int intervalMilliseconds = 100;
 
@@ -32,45 +33,42 @@ namespace net8.Controllers
             List<string> messages = new List<string>();
             Random rand = new Random();
             var (imgKey, subKey) = await ParamUrl.GetWbiKeys();
-
-
-
-
-            for (int i = 2;i < 50;i++)
+            using (var cancellationTokenSource = new CancellationTokenSource())
             {
-                keyValuePairs["mid"] = i.ToString();
-                signedParams = ParamUrl.EncWbi(
-                    parameters: keyValuePairs,
-                    imgKey: imgKey,
-                    subKey: subKey
-                );
+                List<Task<string>> tasks = new List<Task<string>>();
+                // 创建一个 CancellationToken 以便传递给每个任务
+                CancellationToken cancellationToken = cancellationTokenSource.Token;
+                for (int i = 2;i < 1500;i++)
+                {
+                    keyValuePairs["mid"] = i.ToString();
+                    signedParams = ParamUrl.EncWbi(
+                        parameters: keyValuePairs,
+                        imgKey: imgKey,
+                        subKey: subKey
+                    );
 
-                string query = await new FormUrlEncodedContent(signedParams).ReadAsStringAsync();
-                var resolve = await httpClientManager.GetResponseAsync(query);
+                    string query = await new FormUrlEncodedContent(signedParams).ReadAsStringAsync();
+                    tasks.Add(httpClientManager.GetResponseAsync(query,cancellationToken));
 
-                messages.Add(resolve);
-                Thread.Sleep(intervalMilliseconds);
+                    await Task.WhenAny(Task.WhenAll(tasks),Task.Delay(-1,cancellationToken));
+
+                    // 如果用户取消了操作，取消剩余的任务
+                    cancellationTokenSource.Cancel();
+
+                    messages.Add(tasks[i - 2].Result);
+                    //Thread.Sleep(intervalMilliseconds);
+                }
             }
-            foreach (var message in messages)
-            {
 
-                await Console.Out.WriteLineAsync(message);
-            }
+            var result = filter.Filter(messages);
 
-            return messages;
-
-
-
-
-
-
-
-
+            return result;
         }
 
-    }
-    // GET: api/<ReadMoreController>
 
+
+
+    }
 }
 
 

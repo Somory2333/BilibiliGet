@@ -15,6 +15,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDataProtection();
 builder.Services.AddScoped<HttpClientManager>();
 builder.Services.AddScoped<RandomRead>();
+builder.Services.AddScoped<FilterData>();
 var app = builder.Build();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
