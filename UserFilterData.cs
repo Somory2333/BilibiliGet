@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 namespace net8
 {
-    public class FilterData
+    public class UserFilterData
     {
         public IEnumerable<User> Filter (IEnumerable<string> filter)
         {
@@ -23,10 +24,33 @@ namespace net8
                 int vip = jsonString["data"]["vip"]["type"];
                 int isSeniorMember = jsonString["data"]["is_senior_member"];
                 long vipLose = jsonString["data"]["vip"]["due_date"];
-                int liveRoom = jsonString["data"]["live_room"]["roomStatus"];
-                int roomStatu = jsonString["data"]["live_room"]["liveStatus"];
+                int liveRoom;
+                int roomStatu;
+                if (jsonString["data"]["live_room"] is JValue)
+                {
+
+                    liveRoom = 0;
+                    roomStatu = 0;
+                }
+                else
+                {
+                    liveRoom = jsonString["data"]["live_room"]["roomStatus"];
+                    roomStatu = jsonString["data"]["live_room"]["liveStatus"];
+                }
+
+
+
                 string? birthday = jsonString["data"]["birthday"];
-                string? school = jsonString["data"]["school"]["name"];
+                string? school;
+                if (jsonString["data"]["school"] is JValue)
+                {
+                    school = jsonString["data"]["school"];
+                }
+                else
+                {
+                    school = jsonString["data"]["school"]["name"];
+                }
+
                 if (level > 1)
                 {
                     messages.Add(new User
@@ -48,10 +72,10 @@ namespace net8
                     });
 
                 }
-                if (messages.Count % 10 == 0)
+                if (messages.Count % 3 == 0)
                 {
                     InsertUser.InsertUserData(messages);
-                    messages = null;
+                    //messages = null;
                 }
                 Console.WriteLine("mid=" + mid);
 

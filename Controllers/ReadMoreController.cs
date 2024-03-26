@@ -14,14 +14,12 @@ namespace net8.Controllers
     [ApiController]
     public class ReadMoreController : ControllerBase
     {
-        private FilterData filter;
+        private UserFilterData filter;
 
         [HttpGet]
         public async Task<IEnumerable<User>> GetMessageAsync ([FromServices] HttpClientManager httpClientManager)
         {
-            filter = new FilterData();
-            // 设置时间间隔为 0.1 秒
-            int intervalMilliseconds = 100;
+            filter = new UserFilterData();
 
             Dictionary<string,string> keyValuePairs = new Dictionary<string,string>();
             if (keyValuePairs == null)
@@ -38,7 +36,7 @@ namespace net8.Controllers
                 List<Task<string>> tasks = new List<Task<string>>();
                 // 创建一个 CancellationToken 以便传递给每个任务
                 CancellationToken cancellationToken = cancellationTokenSource.Token;
-                for (int i = 2;i < 1500;i++)
+                for (int i = 10;i < 15;i++)
                 {
                     keyValuePairs["mid"] = i.ToString();
                     signedParams = ParamUrl.EncWbi(
@@ -55,7 +53,7 @@ namespace net8.Controllers
                     // 如果用户取消了操作，取消剩余的任务
                     cancellationTokenSource.Cancel();
 
-                    messages.Add(tasks[i - 2].Result);
+                    messages.Add(tasks[i - 10].Result);
                     //Thread.Sleep(intervalMilliseconds);
                 }
             }
