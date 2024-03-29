@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using MongoDB.Bson;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 namespace net8
@@ -14,7 +16,7 @@ namespace net8
             {
 
                 var jsonString = JsonConvert.DeserializeObject<dynamic>(item);
-                uint mid = (uint)jsonString["data"]["mid"];
+                long mid = (long)jsonString["data"]["mid"];
                 string name = (string)jsonString["data"]["name"];
                 string? sex = jsonString["data"]["sex"];
                 string? sign = jsonString["data"]["sign"];

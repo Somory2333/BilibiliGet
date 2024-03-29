@@ -46,7 +46,7 @@
         /// <summary>
         /// 综合
         /// </summary>
-        other = 27,
+        anime_other = 27,
 
         /// <summary>
         /// 番剧(主分区)

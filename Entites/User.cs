@@ -1,8 +1,11 @@
-﻿namespace net8
+﻿
+using MongoDB.Bson;
+
+namespace net8
 {
     public class User
     {
-        public uint Mid
+        public long Mid
         {
             get; set;
         }
