@@ -17,7 +17,7 @@ namespace net8.Entites
         {
             get; set;
         }
-        public string title
+        public string? title
         {
             get; set;
         }
@@ -73,7 +73,7 @@ namespace net8.Entites
         {
             get; set;
         }
-        public DateTime DateTime
+        public DateTime? DateTime
         {
             get; set;
         }

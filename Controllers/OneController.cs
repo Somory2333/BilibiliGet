@@ -44,7 +44,7 @@ namespace net8.Controllers
             {
                 CancellationToken cancellationToken = cancellationTokenSource.Token;
 
-                string response = await clientManager.GetResponseAsync(query,cancellationToken);
+                string response = await clientManager.GetUserInfoAsync(query,cancellationToken);
                 await Console.Out.WriteLineAsync(response);
                 cancellationTokenSource.Cancel();
             }

@@ -46,7 +46,7 @@ namespace net8.Controllers
                     );
 
                     string query = await new FormUrlEncodedContent(signedParams).ReadAsStringAsync();
-                    tasks.Add(httpClientManager.GetResponseAsync(query,cancellationToken));
+                    tasks.Add(httpClientManager.GetUserInfoAsync(query,cancellationToken));
 
                     await Task.WhenAny(Task.WhenAll(tasks),Task.Delay(-1,cancellationToken));
 

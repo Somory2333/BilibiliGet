@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.Collections;
+using System.IO.Compression;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -6,6 +7,12 @@ using System.Text.Json;
 using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
 
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Mvc;
+
+using net8.Entites;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace net8
 {
@@ -15,8 +22,8 @@ namespace net8
         {
             AutomaticDecompression = DecompressionMethods.All
         });
-        private readonly RandomRead randomRead = new RandomRead();
-
+        private static RandomRead randomRead = new RandomRead();
+        private static string user_agent = randomRead.OpenTextAsync().Result;
 
         public HttpClientManager ()
         {
@@ -31,10 +38,13 @@ namespace net8
             _httpClient.DefaultRequestHeaders.AcceptLanguage.ParseAdd("zh-CN,zh;q=0.9,en;q=0.8");
             _httpClient.DefaultRequestHeaders.Upgrade.ParseAdd("1");
             _httpClient.DefaultRequestHeaders.Add("Cache-Control","0");
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
+                user_agent
+            );
             _httpClient.DefaultRequestHeaders.Add("Cookie",CookieRead());
         }
 
-        public string CookieRead ()
+        private string CookieRead ()
         {
             string Truevalue = "";
             try
@@ -66,7 +76,7 @@ namespace net8
             {
                 Console.WriteLine("JSON文件未找到。");
             }
-            catch (JsonException)
+            catch (System.Text.Json.JsonException)
             {
                 Console.WriteLine("无法解析JSON文件。");
             }
@@ -78,14 +88,12 @@ namespace net8
 
         }
 
-        public async Task<string> GetResponseAsync (string query,CancellationToken cancellationToken)
+        public async Task<string> GetUserInfoAsync (string query,CancellationToken cancellationToken)
         {
-            string user_agent = randomRead.OpenTextAsync().Result;
+
 
             //await Console.Out.WriteLineAsync(user_agent);
-            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
-                user_agent
-            );
+
             HttpResponseMessage response;
             try
             {
